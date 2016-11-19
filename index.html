@@ -1,0 +1,65 @@
+<html ng-app>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+	<title>Github API To List Issue History</title>
+</head>
+
+<body ng-controller="GHCtrl">
+
+<div>
+	<h1> Recent Github Issues </h1>
+	<body> Retrieves issues from the previous X number of days in the Angular Github's repository </body>
+	<input type="number" id="numDays" ng-model="numDays" value="7">
+	
+	<a href="#" id="GHSubmitButton" ng-click="getGHData()">Retrieve</a>
+	
+	<div id= "GHAPIData" class="clearfix"></div>
+</div>
+
+<div ng-show="invalidNumDays">
+  <h2>Invalid number of days</h2>
+</div>
+
+<div ng-show="loaded">
+	<div class= repolist clearfix">
+		<h3>List of Issues:</h3>
+		<ul ng-repeat="issue in issues">
+			<li>
+				<a href="{{issue.html_url}}" target="_blank">{{issue.title}} </a>
+				<p>Body: {{issue.body}}"</p>
+				<p>User Login: {{issue.user.login}}</a>
+				<p>Assignee Login: {{assignee}}</a>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<script>
+	function GHCtrl($scope, $http) {
+		$scope.getGHData = function () {
+			$scope.invalidNumDays = false;
+			$scope.loaded = false;
+		
+			GetDateTimeFromNumDays($scope);
+			$http.get("https://api.github.com/repos/angular/angular/issues?since=" + $scope.DateTimeToRetrieve)
+				.success(function (data) {
+					$scope.issues = data;
+					$scope.loaded = true;
+				})
+				.error(function () {
+					$scope.invalidNumDays = true;
+				});
+		}
+	}
+
+	function GetDateTimeFromNumDays($scope) {
+		var dateTime = new Date();
+		if ($scope.numDays <= 0) $scope.invalidNumDays = true;
+		dateTime.setDate(dateTime.getDate()-$scope.numDays);
+		$scope.DateTimeToRetrieve = dateTime;
+	}
+
+</script>
+
+</body>
+</html>
